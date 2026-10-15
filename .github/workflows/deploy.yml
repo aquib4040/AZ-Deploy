@@ -52,6 +52,10 @@ jobs:
             [ -f "$file" ] && rm -f "$file" || true
           done
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
       - name: Deploy Repo to Heroku
         uses: akhileshns/heroku-deploy@v3.13.15
         with:
