@@ -4,4 +4,4 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-ENTRYPOINT ["bash", "start.sh"]\n
+ENTRYPOINT ["bash", "start.sh"]

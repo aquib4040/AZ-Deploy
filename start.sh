@@ -26,4 +26,4 @@ else
 fi
 
 python3 update.py
-exec python3 -m bot\n
+exec python3 -m bot
