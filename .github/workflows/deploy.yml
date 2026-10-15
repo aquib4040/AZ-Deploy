@@ -6,6 +6,9 @@ on:
       HEROKU_APP_NAME:
         description: "Heroku App name"
         required: true
+      HEROKU_EMAIL:
+        description: "Heroku email address"
+        required: true
       HEROKU_API_KEY:
         description: "Heroku API key"
         required: true
@@ -53,8 +56,23 @@ jobs:
       - name: Deploy Container via Native Heroku CLI
         env:
           HEROKU_API_KEY: ${{ inputs.HEROKU_API_KEY }}
+          HEROKU_EMAIL: ${{ inputs.HEROKU_EMAIL }}
           APP_NAME: ${{ inputs.HEROKU_APP_NAME }}
         run: |
+          echo "Configuring Heroku credentials..."
+          cat << EOF > ~/.netrc
+          machine api.heroku.com
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY
+          machine git.heroku.com
+            login $HEROKU_EMAIL
+            password $HEROKU_API_KEY
+          EOF
+          chmod 600 ~/.netrc
+
+          echo "Verifying authentication..."
+          heroku auth:whoami
+
           echo "Logging into Heroku Container Registry..."
           heroku container:login
 

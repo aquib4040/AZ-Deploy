@@ -8,6 +8,7 @@ Clean remote container deployment wrapper for AZML using native Heroku CLI and D
 2. Select the **Deploy AZML to Heroku** workflow.
 3. Click **Run workflow** and provide your credentials:
    - HEROKU_APP_NAME
+   - HEROKU_EMAIL
    - HEROKU_API_KEY
    - BOT_TOKEN
    - OWNER_ID
