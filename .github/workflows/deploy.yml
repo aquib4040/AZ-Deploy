@@ -42,24 +42,20 @@ jobs:
     steps:
       - name: Checkout Deploy Branch
         uses: actions/checkout@v4
-
-      - name: Clean Documentation Files
-        run: |
-          for file in README.md LICENSE; do
-            [ -f "$file" ] && rm -f "$file" || true
-          done
+        with:
+          fetch-depth: 0
 
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Deploy Container via Native Heroku CLI
+      - name: Configure Heroku and Deploy via Git Push
         env:
           HEROKU_API_KEY: ${{ inputs.HEROKU_API_KEY }}
           HEROKU_EMAIL: ${{ inputs.HEROKU_EMAIL }}
           APP_NAME: ${{ inputs.HEROKU_APP_NAME }}
         run: |
-          echo "Configuring Heroku credentials..."
+          echo "Setting up credentials in ~/.netrc..."
           cat << EOF > ~/.netrc
           machine api.heroku.com
             login $HEROKU_EMAIL
@@ -70,11 +66,11 @@ jobs:
           EOF
           chmod 600 ~/.netrc
 
-          echo "Verifying authentication..."
+          echo "Verifying Heroku CLI authentication..."
           heroku auth:whoami
 
-          echo "Logging into Heroku Container Registry..."
-          heroku container:login
+          echo "Setting Heroku stack to container..."
+          heroku stack:set container -a "$APP_NAME"
 
           echo "Setting Heroku Config Vars..."
           heroku config:set \
@@ -87,11 +83,9 @@ jobs:
             UPSTREAM_BRANCH="${{ inputs.UPSTREAM_BRANCH }}" \
             -a "$APP_NAME"
 
-          echo "Building and Pushing Container to Heroku..."
-          heroku container:push web -a "$APP_NAME"
-
-          echo "Releasing Container on Heroku..."
-          heroku container:release web -a "$APP_NAME"
+          echo "Deploying via Heroku Git Push (heroku.yml)..."
+          git remote add heroku "https://git.heroku.com/$APP_NAME.git" || git remote set-url heroku "https://git.heroku.com/$APP_NAME.git"
+          git push -f heroku main
 
           echo "Ensuring web dyno is running..."
           heroku ps:scale web=1 -a "$APP_NAME" || true
