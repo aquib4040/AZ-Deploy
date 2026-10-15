@@ -15,6 +15,16 @@ TELEGRAM_API=${TELEGRAM_API}
 TELEGRAM_HASH=${TELEGRAM_HASH}
 DATABASE_URL=${DATABASE_URL}
 EOF
+  if [ -n "$BASE_URL" ]; then
+    echo "BASE_URL=${BASE_URL}" >> .env
+  fi
+fi
+
+if [ -n "$HEROKU_APP_NAME" ] && [ -z "$BASE_URL" ]; then
+  export BASE_URL="https://${HEROKU_APP_NAME}.herokuapp.com"
+  if [ -f .env ]; then
+    echo "BASE_URL=${BASE_URL}" >> .env
+  fi
 fi
 
 if [ -n "$HEROKU_PORT" ]; then

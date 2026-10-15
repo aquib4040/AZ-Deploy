@@ -12,6 +12,10 @@ on:
       HEROKU_API_KEY:
         description: "Heroku API key"
         required: true
+      BASE_URL:
+        description: "Base URL (defaults to https://<app-name>.herokuapp.com)"
+        required: false
+        default: ""
       BOT_TOKEN:
         description: "Telegram bot token"
         required: true
@@ -72,8 +76,17 @@ jobs:
           echo "Setting Heroku stack to container..."
           heroku stack:set container -a "$APP_NAME"
 
+          if [ -n "${{ inputs.BASE_URL }}" ]; then
+            FINAL_BASE_URL="${{ inputs.BASE_URL }}"
+          else
+            FINAL_BASE_URL="https://${APP_NAME}.herokuapp.com"
+          fi
+          echo "Using BASE_URL: $FINAL_BASE_URL"
+
           echo "Setting Heroku Config Vars..."
           heroku config:set \
+            BASE_URL="$FINAL_BASE_URL" \
+            HEROKU_APP_NAME="$APP_NAME" \
             BOT_TOKEN="${{ inputs.BOT_TOKEN }}" \
             OWNER_ID="${{ inputs.OWNER_ID }}" \
             DATABASE_URL="${{ inputs.DATABASE_URL }}" \
